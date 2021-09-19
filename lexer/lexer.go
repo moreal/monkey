@@ -23,6 +23,10 @@ func (l *Lexer) NextToken() (tok token.Token) {
 		tok = newTokenWithChar(token.ASSIGN, l.ch)
 	case '+':
 		tok = newTokenWithChar(token.PLUS, l.ch)
+	case '-':
+		tok = newTokenWithChar(token.MINUS, l.ch)
+	case '*':
+		tok = newTokenWithChar(token.ASTERISK, l.ch)
 	case '(':
 		tok = newTokenWithChar(token.LPAREN, l.ch)
 	case ')':
@@ -31,6 +35,14 @@ func (l *Lexer) NextToken() (tok token.Token) {
 		tok = newTokenWithChar(token.LBRACE, l.ch)
 	case '}':
 		tok = newTokenWithChar(token.RBRACE, l.ch)
+	case '!':
+		tok = newTokenWithChar(token.BANG, l.ch)
+	case '<':
+		tok = newTokenWithChar(token.LT, l.ch)
+	case '>':
+		tok = newTokenWithChar(token.GT, l.ch)
+	case '/':
+		tok = newTokenWithChar(token.SLASH, l.ch)
 	case ',':
 		tok = newTokenWithChar(token.COMMA, l.ch)
 	case ';':
@@ -56,8 +68,13 @@ func (l *Lexer) NextToken() (tok token.Token) {
 
 func identifierToTokenType(identifier string) token.TokenType {
 	keywords := map[string]token.TokenType{
-		"fn":  token.FUNCTION,
-		"let": token.LET,
+		"fn":     token.FUNCTION,
+		"let":    token.LET,
+		"if":     token.IF,
+		"else":   token.ELSE,
+		"return": token.RETURN,
+		"true":   token.TRUE,
+		"false":  token.FALSE,
 	}
 
 	if tok, ok := keywords[identifier]; ok {
