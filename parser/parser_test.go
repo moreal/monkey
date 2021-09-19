@@ -73,6 +73,41 @@ return 100;
 	}
 }
 
+func TestIdentifierExpression(t *testing.T) {
+	input := `
+foobar;
+`
+	l := lexer.New(input)
+	p := New(l)
+
+	program := p.ParseProgram()
+	if program == nil {
+		t.Fatalf("ParseProgram() returned nil.")
+	}
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("It should have 1 statesments but %d", len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("Expected ExpressionStatement but '%T'", program.Statements[0])
+	}
+
+	ident, ok := stmt.Expression.(*ast.Identifier)
+	if !ok {
+		t.Fatalf("Expected Identifier but '%T'", stmt.Expression)
+	}
+
+	if ident.Value != "foobar" {
+		t.Fatalf("Expected 'foobar' identifier but '%s'", ident.Value)
+	}
+
+	if ident.TokenLiteral() != "foobar" {
+		t.Fatalf("Expected 'foobar' TokenLiteral but '%s'", ident.TokenLiteral())
+	}
+}
+
 func testLetStatement(t *testing.T, s ast.Statement, name string) bool {
 	if s.TokenLiteral() != "let" {
 		t.Errorf("TokenLiteral expected 'let' but '%q'", s.TokenLiteral())
