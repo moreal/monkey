@@ -20,7 +20,13 @@ func (l *Lexer) NextToken() (tok token.Token) {
 
 	switch l.ch {
 	case '=':
-		tok = newTokenWithChar(token.ASSIGN, l.ch)
+		if l.peekChar() == '=' {
+			ch := l.ch
+			l.readChar()
+			tok = newToken(token.EQ, string(ch)+string(l.ch))
+		} else {
+			tok = newTokenWithChar(token.ASSIGN, l.ch)
+		}
 	case '+':
 		tok = newTokenWithChar(token.PLUS, l.ch)
 	case '-':
@@ -36,17 +42,51 @@ func (l *Lexer) NextToken() (tok token.Token) {
 	case '}':
 		tok = newTokenWithChar(token.RBRACE, l.ch)
 	case '!':
-		tok = newTokenWithChar(token.BANG, l.ch)
+		if l.peekChar() == '=' {
+			ch := l.ch
+			l.readChar()
+			tok = newToken(token.NEQ, string(ch)+string(l.ch))
+		} else {
+			tok = newTokenWithChar(token.BANG, l.ch)
+		}
 	case '<':
-		tok = newTokenWithChar(token.LT, l.ch)
+		if l.peekChar() == '=' {
+			ch := l.ch
+			l.readChar()
+			tok = newToken(token.LTE, string(ch)+string(l.ch))
+		} else {
+			tok = newTokenWithChar(token.LT, l.ch)
+		}
 	case '>':
-		tok = newTokenWithChar(token.GT, l.ch)
+		if l.peekChar() == '=' {
+			ch := l.ch
+			l.readChar()
+			tok = newToken(token.GTE, string(ch)+string(l.ch))
+		} else {
+			tok = newTokenWithChar(token.GT, l.ch)
+		}
 	case '/':
 		tok = newTokenWithChar(token.SLASH, l.ch)
 	case ',':
 		tok = newTokenWithChar(token.COMMA, l.ch)
 	case ';':
 		tok = newTokenWithChar(token.SEMICOLON, l.ch)
+	case '&':
+		if l.peekChar() == '&' {
+			ch := l.ch
+			l.readChar()
+			tok = newToken(token.LAND, string(ch)+string(l.ch))
+		} else {
+			tok = newTokenWithChar(token.BAND, l.ch)
+		}
+	case '|':
+		if l.peekChar() == '|' {
+			ch := l.ch
+			l.readChar()
+			tok = newToken(token.LOR, string(ch)+string(l.ch))
+		} else {
+			tok = newTokenWithChar(token.BOR, l.ch)
+		}
 	case 0:
 		tok = newToken(token.EOF, "")
 	default:
@@ -126,6 +166,15 @@ func newTokenWithChar(tokenType token.TokenType, char byte) token.Token {
 
 func newToken(tokenType token.TokenType, literal string) token.Token {
 	return token.Token{Type: tokenType, Literal: literal}
+}
+
+func (l *Lexer) peekChar() byte {
+	// TODO: Support Unicode
+	if l.readPosition >= len(l.input) {
+		return 0
+	} else {
+		return l.input[l.readPosition]
+	}
 }
 
 func (l *Lexer) readChar() {

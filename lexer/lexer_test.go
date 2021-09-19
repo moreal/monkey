@@ -19,6 +19,7 @@ if (5 < 10) {
 } else {
   return false;
 }
+return 1|2 == 2 && 1 >= 2 || 2 <= 3 && 2&0 != 3;
 `
 
 	tests := []struct {
@@ -95,6 +96,28 @@ if (5 < 10) {
 		{token.FALSE, "false"},
 		{token.SEMICOLON, ";"},
 		{token.RBRACE, "}"},
+		// return 1|2 == 2 && 1 >= 2 || 2 <= 3 && 2&0 != 3;
+		{token.RETURN, "return"},
+		{token.INT, "1"},
+		{token.BOR, "|"},
+		{token.INT, "2"},
+		{token.EQ, "=="},
+		{token.INT, "2"},
+		{token.LAND, "&&"},
+		{token.INT, "1"},
+		{token.GTE, ">="},
+		{token.INT, "2"},
+		{token.LOR, "||"},
+		{token.INT, "2"},
+		{token.LTE, "<="},
+		{token.INT, "3"},
+		{token.LAND, "&&"},
+		{token.INT, "2"},
+		{token.BAND, "&"},
+		{token.INT, "0"},
+		{token.NEQ, "!="},
+		{token.INT, "3"},
+		{token.SEMICOLON, ";"},
 		{token.EOF, ""},
 	}
 
