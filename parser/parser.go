@@ -4,6 +4,7 @@ import (
 	"github.com/moreal/monkey/ast"
 	"github.com/moreal/monkey/lexer"
 	"github.com/moreal/monkey/token"
+	"strconv"
 )
 
 const (
@@ -35,6 +36,7 @@ func New(l *lexer.Lexer) *Parser {
 	parser := &Parser{l: l, prefixParseFns: make(map[token.TokenType]prefixParseFn), infixParseFns: make(map[token.TokenType]infixParseFn)}
 
 	parser.registerPrefixParseFn(token.IDENT, parser.parseIdentifier)
+	parser.registerPrefixParseFn(token.INT, parser.parseIntgerLiteral)
 
 	parser.nextToken()
 	parser.nextToken()
@@ -126,6 +128,18 @@ func (p *Parser) parseExpression() ast.Expression {
 
 func (p *Parser) parseIdentifier() ast.Expression {
 	return &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+}
+
+func (p *Parser) parseIntgerLiteral() ast.Expression {
+	integerLiteral := &ast.IntegerLiteral{Token: p.curToken}
+
+	v, err := strconv.ParseInt(p.curToken.Literal, 0, 64)
+	if err != nil {
+		return nil
+	}
+
+	integerLiteral.Value = v
+	return integerLiteral
 }
 
 func (p *Parser) expectPeek(tokenType token.TokenType) bool {

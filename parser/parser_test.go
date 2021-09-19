@@ -108,6 +108,41 @@ foobar;
 	}
 }
 
+func TestIntegerLiteralExpression(t *testing.T) {
+	input := `
+156497;
+`
+	l := lexer.New(input)
+	p := New(l)
+
+	program := p.ParseProgram()
+	if program == nil {
+		t.Fatalf("ParseProgram() returned nil.")
+	}
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("It should have 1 statesments but %d", len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("Expected ExpressionStatement but '%T'", program.Statements[0])
+	}
+
+	integerLiteral, ok := stmt.Expression.(*ast.IntegerLiteral)
+	if !ok {
+		t.Fatalf("Expected IntegerLiteral but '%T'", stmt.Expression)
+	}
+
+	if integerLiteral.Value != 156497 {
+		t.Fatalf("Expected 156497 identifier but '%d'", integerLiteral.Value)
+	}
+
+	if integerLiteral.TokenLiteral() != "156497" {
+		t.Fatalf("Expected '156497' TokenLiteral but '%s'", integerLiteral.TokenLiteral())
+	}
+}
+
 func testLetStatement(t *testing.T, s ast.Statement, name string) bool {
 	if s.TokenLiteral() != "let" {
 		t.Errorf("TokenLiteral expected 'let' but '%q'", s.TokenLiteral())
