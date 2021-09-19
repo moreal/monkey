@@ -10,10 +10,10 @@ import (
 
 const PROMPT = ">> "
 
-func Start(in io.Reader, out io.Writer) {
+func Start(in io.Reader, out io.Writer, err io.Writer) {
 	scanner := bufio.NewScanner(in)
 	for {
-		fmt.Fprintf(out, PROMPT)
+		fmt.Fprintf(err, PROMPT)
 		scanned := scanner.Scan()
 		if !scanned {
 			return
