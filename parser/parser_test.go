@@ -40,6 +40,39 @@ let foobar = 838383;
 	}
 }
 
+func TestReturnStatement(t *testing.T) {
+	input := `
+return 5;
+return 10;
+return 100;
+`
+	l := lexer.New(input)
+	p := New(l)
+
+	program := p.ParseProgram()
+	if program == nil {
+		t.Fatalf("ParseProgram() returned nil.")
+	}
+
+	if len(program.Statements) != 3 {
+		t.Fatalf("It should have 3 statesments but %d", len(program.Statements))
+	}
+
+	tests := []struct {
+	}{
+		{},
+		{},
+		{},
+	}
+
+	for i, _ := range tests {
+		stmt := program.Statements[i]
+		if !testReturnStatement(t, stmt) {
+			return
+		}
+	}
+}
+
 func testLetStatement(t *testing.T, s ast.Statement, name string) bool {
 	if s.TokenLiteral() != "let" {
 		t.Errorf("TokenLiteral expected 'let' but '%q'", s.TokenLiteral())
@@ -59,6 +92,21 @@ func testLetStatement(t *testing.T, s ast.Statement, name string) bool {
 
 	if letStmt.Name.TokenLiteral() != name {
 		t.Errorf("LetStatement.Name.TokenLiteral() expected to return '%s' but '%s'", name, letStmt.Name.Value)
+		return false
+	}
+
+	return true
+}
+
+func testReturnStatement(t *testing.T, s ast.Statement) bool {
+	if s.TokenLiteral() != "return" {
+		t.Errorf("TokenLiteral expected 'let' but '%q'", s.TokenLiteral())
+		return false
+	}
+
+	_, ok := s.(*ast.ReturnStatement)
+	if !ok {
+		t.Errorf("expected 'ReturnStatement' type but '%T'", s)
 		return false
 	}
 
