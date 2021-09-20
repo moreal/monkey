@@ -59,14 +59,7 @@ return 100;
 		t.Fatalf("It should have 3 statesments but %d", len(program.Statements))
 	}
 
-	tests := []struct {
-	}{
-		{},
-		{},
-		{},
-	}
-
-	for i, _ := range tests {
+	for i := 0; i < 3; i++ {
 		stmt := program.Statements[i]
 		if !testReturnStatement(t, stmt) {
 			return
