@@ -89,3 +89,15 @@ func (*PrefixExpression) expressionNode() {}
 func (p *PrefixExpression) TokenLiteral() string {
 	return p.Token.Literal
 }
+
+type InfixExpression struct {
+	Token    token.Token
+	Left     Expression
+	Operator string
+	Right    Expression
+}
+
+func (*InfixExpression) expressionNode() {}
+func (i *InfixExpression) TokenLiteral() string {
+	return i.Token.Literal
+}

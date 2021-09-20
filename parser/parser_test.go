@@ -170,6 +170,57 @@ func TestParsePrefixExpression(t *testing.T) {
 	}
 }
 
+func TestParseInfixExpression(t *testing.T) {
+	tests := []struct {
+		input    string
+		left     int64
+		operator string
+		right    int64
+	}{
+		{"5 + 5;", 5, "+", 5},
+		{"5 - 5;", 5, "-", 5},
+		{"5 * 5;", 5, "*", 5},
+		{"5 == 5;", 5, "==", 5},
+		{"5 / 5;", 5, "/", 5},
+		{"5 != 5;", 5, "!=", 5},
+		{"5 > 5;", 5, ">", 5},
+		{"5 >= 5;", 5, ">=", 5},
+		{"5 < 5;", 5, "<", 5},
+		{"5 <= 5;", 5, "<=", 5},
+	}
+
+	for _, test := range tests {
+		l := lexer.New(test.input)
+		p := New(l)
+
+		program := p.ParseProgram()
+		if program == nil {
+			t.Fatalf("ParseProgram() returned nil.")
+		}
+
+		if len(program.Statements) != 1 {
+			t.Fatalf("It should have 1 statesment but %d", len(program.Statements))
+		}
+
+		stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+		if !ok {
+			log.Fatalf("Expected 'ExpressionStatement' type but '%T'", program.Statements[0])
+		}
+
+		expr, ok := stmt.Expression.(*ast.InfixExpression)
+		if !ok {
+			log.Fatalf("Expected 'InfixExpression' type but '%T'", stmt.Expression)
+		}
+
+		if expr.Operator != test.operator {
+			log.Fatalf("Expected '%s' type but '%s'", test.operator, expr.Operator)
+		}
+
+		testIntegerLiteral(t, expr.Left, test.left)
+		testIntegerLiteral(t, expr.Right, test.right)
+	}
+}
+
 func testIntegerLiteral(t *testing.T, expression ast.Expression, value int64) {
 	integerLiteral, ok := expression.(*ast.IntegerLiteral)
 	if !ok {
