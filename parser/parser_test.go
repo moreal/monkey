@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/moreal/monkey/ast"
 	"github.com/moreal/monkey/lexer"
+	"log"
 	"testing"
 )
 
@@ -124,6 +125,49 @@ func TestIntegerLiteralExpression(t *testing.T) {
 	}
 
 	testIntegerLiteral(t, stmt.Expression, 156497)
+}
+
+func TestParsePrefixExpression(t *testing.T) {
+	tests := []struct {
+		input             string
+		operator          string
+		expressionLiteral string
+	}{
+		{"-1;", "-", "1"},
+		{"!2;", "!", "2"},
+	}
+
+	for _, test := range tests {
+		l := lexer.New(test.input)
+		p := New(l)
+
+		program := p.ParseProgram()
+		if program == nil {
+			t.Fatalf("ParseProgram() returned nil.")
+		}
+
+		if len(program.Statements) != 1 {
+			t.Fatalf("It should have 1 statesment but %d", len(program.Statements))
+		}
+
+		stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+		if !ok {
+			log.Fatalf("Expected 'ExpressionStatement' type but '%T'", program.Statements[0])
+		}
+
+		expr, ok := stmt.Expression.(*ast.PrefixExpression)
+		if !ok {
+			log.Fatalf("Expected 'PrefixExpression' type but '%T'", stmt.Expression)
+		}
+
+		if expr.Operator != test.operator {
+			log.Fatalf("Expected '%s' type but '%s'", test.operator, expr.Operator)
+		}
+
+		if expr.Right.TokenLiteral() != test.expressionLiteral {
+			log.Fatalf("Expected '%s' type but '%s'", test.expressionLiteral, expr.Right.TokenLiteral())
+		}
+	}
 }
 
 func testIntegerLiteral(t *testing.T, expression ast.Expression, value int64) {

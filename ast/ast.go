@@ -78,3 +78,14 @@ func (*IntegerLiteral) expressionNode() {}
 func (i *IntegerLiteral) TokenLiteral() string {
 	return i.Token.Literal
 }
+
+type PrefixExpression struct {
+	Token    token.Token
+	Operator string
+	Right    Expression
+}
+
+func (*PrefixExpression) expressionNode() {}
+func (p *PrefixExpression) TokenLiteral() string {
+	return p.Token.Literal
+}

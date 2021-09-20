@@ -38,6 +38,9 @@ func New(l *lexer.Lexer) *Parser {
 	parser.registerPrefixParseFn(token.IDENT, parser.parseIdentifier)
 	parser.registerPrefixParseFn(token.INT, parser.parseIntgerLiteral)
 
+	parser.registerPrefixParseFn(token.MINUS, parser.parsePrefixExpression)
+	parser.registerPrefixParseFn(token.BANG, parser.parsePrefixExpression)
+
 	parser.nextToken()
 	parser.nextToken()
 	return parser
@@ -104,7 +107,7 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 
 func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 	stmt := &ast.ExpressionStatement{Token: p.curToken}
-	stmt.Expression = p.parseExpression()
+	stmt.Expression = p.parseExpression(LOWEST)
 
 	// TODO: Parse expression
 
@@ -115,7 +118,7 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 	return stmt
 }
 
-func (p *Parser) parseExpression() ast.Expression {
+func (p *Parser) parseExpression(precedence int) ast.Expression {
 	prefix := p.prefixParseFns[p.curToken.Type]
 	if prefix == nil {
 		return nil
@@ -124,6 +127,18 @@ func (p *Parser) parseExpression() ast.Expression {
 	leftExp := prefix()
 
 	return leftExp
+}
+
+func (p *Parser) parsePrefixExpression() ast.Expression {
+	expression := &ast.PrefixExpression{
+		Token:    p.curToken,
+		Operator: p.curToken.Literal,
+	}
+	p.nextToken()
+
+	expression.Right = p.parseExpression(PREFIX)
+
+	return expression
 }
 
 func (p *Parser) parseIdentifier() ast.Expression {
