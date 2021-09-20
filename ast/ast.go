@@ -101,3 +101,13 @@ func (*InfixExpression) expressionNode() {}
 func (i *InfixExpression) TokenLiteral() string {
 	return i.Token.Literal
 }
+
+type Boolean struct {
+	Token token.Token
+	Value bool
+}
+
+func (*Boolean) expressionNode() {}
+func (b *Boolean) TokenLiteral() string {
+	return b.Token.Literal
+}

@@ -51,6 +51,9 @@ func New(l *lexer.Lexer) *Parser {
 	parser.registerPrefixParseFn(token.IDENT, parser.parseIdentifier)
 	parser.registerPrefixParseFn(token.INT, parser.parseIntgerLiteral)
 
+	parser.registerPrefixParseFn(token.TRUE, parser.parseBoolean)
+	parser.registerPrefixParseFn(token.FALSE, parser.parseBoolean)
+
 	parser.registerPrefixParseFn(token.MINUS, parser.parsePrefixExpression)
 	parser.registerPrefixParseFn(token.BANG, parser.parsePrefixExpression)
 
@@ -204,6 +207,10 @@ func (p *Parser) parseIntgerLiteral() ast.Expression {
 
 	integerLiteral.Value = v
 	return integerLiteral
+}
+
+func (p *Parser) parseBoolean() ast.Expression {
+	return &ast.Boolean{Token: p.curToken, Value: p.curToken.Type == token.TRUE}
 }
 
 func (p *Parser) expectPeek(tokenType token.TokenType) bool {

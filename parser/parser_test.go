@@ -116,14 +116,13 @@ func TestIntegerLiteralExpression(t *testing.T) {
 	testIntegerLiteral(t, stmt.Expression, 156497)
 }
 
-func TestParsePrefixExpression(t *testing.T) {
+func TestBooleanExpression(t *testing.T) {
 	tests := []struct {
-		input             string
-		operator          string
-		expressionLiteral string
+		input string
+		value bool
 	}{
-		{"-1;", "-", "1"},
-		{"!2;", "!", "2"},
+		{"true;", true},
+		{"false;", false},
 	}
 
 	for _, test := range tests {
@@ -144,18 +143,41 @@ func TestParsePrefixExpression(t *testing.T) {
 			log.Fatalf("Expected 'ExpressionStatement' type but '%T'", program.Statements[0])
 		}
 
-		expr, ok := stmt.Expression.(*ast.PrefixExpression)
+		testBoolean(t, stmt.Expression, test.value)
+	}
+}
+
+func TestParsePrefixExpression(t *testing.T) {
+	tests := []struct {
+		input    string
+		operator string
+		right    interface{}
+	}{
+		{"-1;", "-", 1},
+		{"!2;", "!", 2},
+		{"!true;", "!", true},
+		{"!false;", "!", false},
+	}
+
+	for _, test := range tests {
+		l := lexer.New(test.input)
+		p := New(l)
+
+		program := p.ParseProgram()
+		if program == nil {
+			t.Fatalf("ParseProgram() returned nil.")
+		}
+
+		if len(program.Statements) != 1 {
+			t.Fatalf("It should have 1 statesment but %d", len(program.Statements))
+		}
+
+		stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
 		if !ok {
-			log.Fatalf("Expected 'PrefixExpression' type but '%T'", stmt.Expression)
+			log.Fatalf("Expected 'ExpressionStatement' type but '%T'", program.Statements[0])
 		}
 
-		if expr.Operator != test.operator {
-			log.Fatalf("Expected '%s' type but '%s'", test.operator, expr.Operator)
-		}
-
-		if expr.Right.TokenLiteral() != test.expressionLiteral {
-			log.Fatalf("Expected '%s' type but '%s'", test.expressionLiteral, expr.Right.TokenLiteral())
-		}
+		testPrefixExpression(t, stmt.Expression, test.operator, test.right)
 	}
 }
 
@@ -224,7 +246,22 @@ func testLiteralExpression(t *testing.T, expr ast.Expression, expected interface
 		testIntegerLiteral(t, expr, v)
 	case string:
 		testIdentifier(t, expr, v)
+	case bool:
+		testBoolean(t, expr, v)
 	}
+}
+
+func testPrefixExpression(t *testing.T, expr ast.Expression, operator string, right interface{}) {
+	prefixExpr, ok := expr.(*ast.PrefixExpression)
+	if !ok {
+		log.Fatalf("Expected 'PrefixExpression' type but '%T'", expr)
+	}
+
+	if prefixExpr.Operator != operator {
+		log.Fatalf("Expected '%s' type but '%s'", operator, prefixExpr.Operator)
+	}
+
+	testLiteralExpression(t, prefixExpr.Right, right)
 }
 
 func testInfixExpression(t *testing.T, expr ast.Expression, left interface{}, operator string, right interface{}) {
@@ -254,6 +291,21 @@ func testIntegerLiteral(t *testing.T, expression ast.Expression, value int64) {
 
 	if integerLiteral.TokenLiteral() != fmt.Sprintf("%d", value) {
 		t.Fatalf("Expected '%d' TokenLiteral but '%s'", value, integerLiteral.TokenLiteral())
+	}
+}
+
+func testBoolean(t *testing.T, expression ast.Expression, value bool) {
+	boolean, ok := expression.(*ast.Boolean)
+	if !ok {
+		t.Fatalf("Expected IntegerLiteral but '%T'", expression)
+	}
+
+	if boolean.Value != value {
+		t.Fatalf("Expected %t identifier but '%t'", value, boolean.Value)
+	}
+
+	if boolean.TokenLiteral() != fmt.Sprintf("%t", value) {
+		t.Fatalf("Expected '%t' TokenLiteral but '%s'", value, boolean.TokenLiteral())
 	}
 }
 
