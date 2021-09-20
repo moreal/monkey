@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"fmt"
 	"github.com/moreal/monkey/ast"
 	"github.com/moreal/monkey/lexer"
 	"testing"
@@ -129,17 +130,21 @@ func TestIntegerLiteralExpression(t *testing.T) {
 		t.Fatalf("Expected ExpressionStatement but '%T'", program.Statements[0])
 	}
 
-	integerLiteral, ok := stmt.Expression.(*ast.IntegerLiteral)
+	testIntegerLiteral(t, stmt.Expression, 156497)
+}
+
+func testIntegerLiteral(t *testing.T, expression ast.Expression, value int64) {
+	integerLiteral, ok := expression.(*ast.IntegerLiteral)
 	if !ok {
-		t.Fatalf("Expected IntegerLiteral but '%T'", stmt.Expression)
+		t.Fatalf("Expected IntegerLiteral but '%T'", expression)
 	}
 
-	if integerLiteral.Value != 156497 {
-		t.Fatalf("Expected 156497 identifier but '%d'", integerLiteral.Value)
+	if integerLiteral.Value != value {
+		t.Fatalf("Expected %d identifier but '%d'", value, integerLiteral.Value)
 	}
 
-	if integerLiteral.TokenLiteral() != "156497" {
-		t.Fatalf("Expected '156497' TokenLiteral but '%s'", integerLiteral.TokenLiteral())
+	if integerLiteral.TokenLiteral() != fmt.Sprintf("%d", value) {
+		t.Fatalf("Expected '%d' TokenLiteral but '%s'", value, integerLiteral.TokenLiteral())
 	}
 }
 
