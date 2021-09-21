@@ -1,6 +1,7 @@
 package ast
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/moreal/monkey/token"
 )
@@ -11,6 +12,7 @@ type Node interface {
 
 type Statement interface {
 	Node
+	fmt.Stringer
 	statementNode()
 }
 
@@ -42,6 +44,17 @@ func (*LetStatement) statementNode() {}
 func (ls *LetStatement) TokenLiteral() string {
 	return ls.Token.Literal
 }
+func (ls *LetStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(ls.TokenLiteral() + " ")
+	out.WriteString(ls.Name.String())
+	out.WriteString(" = ")
+	out.WriteString(ls.Value.String())
+	out.WriteString(token.SEMICOLON)
+
+	return out.String()
+}
 
 type ReturnStatement struct {
 	Token token.Token
@@ -51,6 +64,15 @@ type ReturnStatement struct {
 func (*ReturnStatement) statementNode() {}
 func (rs *ReturnStatement) TokenLiteral() string {
 	return rs.Token.Literal
+}
+func (rs *ReturnStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(rs.TokenLiteral() + " ")
+	out.WriteString(rs.Value.String())
+	out.WriteString(token.SEMICOLON)
+
+	return out.String()
 }
 
 type Identifier struct {
@@ -74,6 +96,14 @@ type ExpressionStatement struct {
 func (*ExpressionStatement) statementNode() {}
 func (es *ExpressionStatement) TokenLiteral() string {
 	return es.Token.Literal
+}
+func (es *ExpressionStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(es.String())
+	out.WriteString(token.SEMICOLON)
+
+	return out.String()
 }
 
 type IntegerLiteral struct {
