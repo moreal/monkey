@@ -147,6 +147,99 @@ func TestBooleanExpression(t *testing.T) {
 	}
 }
 
+func TestIfExpression(t *testing.T) {
+	input := `if (x < y) { x }`
+
+	l := lexer.New(input)
+	p := New(l)
+
+	program := p.ParseProgram()
+	if program == nil {
+		t.Fatalf("ParseProgram() returned nil.")
+	}
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("It should have 1 statesment but %d", len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		log.Fatalf("Expected 'ExpressionStatement' type but '%T'", program.Statements[0])
+	}
+
+	expr, ok := stmt.Expression.(*ast.IfExpression)
+	if !ok {
+		t.Fatalf("Expected 'IfExpression' but '%T'", stmt.Expression)
+	}
+
+	testInfixExpression(t, expr.Condition, "x", "<", "y")
+
+	if len(expr.Consequence.Statements) != 1 {
+		t.Fatalf("It should have 1 statesment but %d", len(expr.Consequence.Statements))
+	}
+
+	consequence, ok := expr.Consequence.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("Expected 'ExpressionStatement' type but '%T'", expr.Consequence.Statements[0])
+	}
+
+	testIdentifier(t, consequence.Expression, "x")
+
+	if expr.Alternative != nil {
+		t.Fatalf("Expected Alternative is nil because there is no else block statement. But '%+v' came.", expr.Alternative)
+	}
+}
+
+func TestIfElseExpression(t *testing.T) {
+	input := `if (x < y) { x } else { y }`
+
+	l := lexer.New(input)
+	p := New(l)
+
+	program := p.ParseProgram()
+	if program == nil {
+		t.Fatalf("ParseProgram() returned nil.")
+	}
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("It should have 1 statesment but %d", len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		log.Fatalf("Expected 'ExpressionStatement' type but '%T'", program.Statements[0])
+	}
+
+	expr, ok := stmt.Expression.(*ast.IfExpression)
+	if !ok {
+		t.Fatalf("Expected 'IfExpression' but '%T'", stmt.Expression)
+	}
+
+	testInfixExpression(t, expr.Condition, "x", "<", "y")
+
+	if len(expr.Consequence.Statements) != 1 {
+		t.Fatalf("It should have 1 statesment but %d", len(expr.Consequence.Statements))
+	}
+
+	consequence, ok := expr.Consequence.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("Expected 'ExpressionStatement' type but '%T'", expr.Consequence.Statements[0])
+	}
+
+	testIdentifier(t, consequence.Expression, "x")
+
+	if len(expr.Alternative.Statements) != 1 {
+		t.Fatalf("It should have 1 statesment but %d", len(expr.Alternative.Statements))
+	}
+
+	alternative, ok := expr.Alternative.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("Expected 'ExpressionStatement' type but '%T'", expr.Alternative.Statements[0])
+	}
+
+	testIdentifier(t, alternative.Expression, "y")
+}
+
 func TestOrderPrecedences(t *testing.T) {
 	tests := []struct {
 		input    string
