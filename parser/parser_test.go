@@ -116,6 +116,42 @@ func TestIntegerLiteralExpression(t *testing.T) {
 	testIntegerLiteral(t, stmt.Expression, 156497)
 }
 
+func TestCallExpression(t *testing.T) {
+	input := `add(1, 2 * 3, 4 + 5);`
+
+	l := lexer.New(input)
+	p := New(l)
+
+	program := p.ParseProgram()
+	if program == nil {
+		t.Fatalf("ParseProgram() returned nil.")
+	}
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("It should have 1 statesments but %d", len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("Expected ExpressionStatement but '%T'", program.Statements[0])
+	}
+
+	expr, ok := stmt.Expression.(*ast.CallExpression)
+	if !ok {
+		t.Fatalf("Expected CallExpression but '%T'", stmt.Expression)
+	}
+
+	testIdentifier(t, expr.Function, "add")
+
+	if len(expr.Arguments) != 3 {
+		t.Fatalf("Expected 3 arguments but '%d' arguments came.", len(expr.Arguments))
+	}
+
+	testLiteralExpression(t, expr.Arguments[0], 1)
+	testInfixExpression(t, expr.Arguments[1], 2, "*", 3)
+	testInfixExpression(t, expr.Arguments[2], 4, "+", 5)
+}
+
 func TestBooleanExpression(t *testing.T) {
 	tests := []struct {
 		input string
@@ -321,6 +357,8 @@ func TestOrderPrecedences(t *testing.T) {
 		{"-1*1 +1;", "(((-1) * 1) + 1)"},
 		{"!-1+1*1;", "((!(-1)) + (1 * 1))"},
 		{"1+1*(1+2);", "(1 + (1 * (1 + 2)))"},
+		{"a + add(b * c) + d;", "((a + add((b * c))) + d)"},
+		{"add(add(x) * c);", "add((add(x) * c))"},
 	}
 
 	for _, test := range tests {
