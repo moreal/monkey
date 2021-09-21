@@ -49,7 +49,9 @@ func New(l *lexer.Lexer) *Parser {
 	parser := &Parser{l: l, prefixParseFns: make(map[token.TokenType]prefixParseFn), infixParseFns: make(map[token.TokenType]infixParseFn)}
 
 	parser.registerPrefixParseFn(token.IDENT, parser.parseIdentifier)
-	parser.registerPrefixParseFn(token.INT, parser.parseIntgerLiteral)
+	parser.registerPrefixParseFn(token.INT, parser.parseIntegerLiteral)
+
+	parser.registerPrefixParseFn(token.LPAREN, parser.parseGroupedExpression)
 
 	parser.registerPrefixParseFn(token.TRUE, parser.parseBoolean)
 	parser.registerPrefixParseFn(token.FALSE, parser.parseBoolean)
@@ -193,11 +195,23 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 	return expression
 }
 
+func (p *Parser) parseGroupedExpression() ast.Expression {
+	p.nextToken() // LPAREN
+
+	exp := p.parseExpression(LOWEST)
+
+	if !p.expectPeek(token.RPAREN) {
+		return nil
+	}
+
+	return exp
+}
+
 func (p *Parser) parseIdentifier() ast.Expression {
 	return &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 }
 
-func (p *Parser) parseIntgerLiteral() ast.Expression {
+func (p *Parser) parseIntegerLiteral() ast.Expression {
 	integerLiteral := &ast.IntegerLiteral{Token: p.curToken}
 
 	v, err := strconv.ParseInt(p.curToken.Literal, 0, 64)
