@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/moreal/monkey/token"
+	"strings"
 )
 
 type Node interface {
@@ -203,6 +204,33 @@ func (bs *BlockStatement) String() string {
 	for _, stmt := range bs.Statements {
 		out.WriteString(stmt.String())
 	}
+
+	return out.String()
+}
+
+type FunctionLiteral struct {
+	Token      token.Token
+	Parameters []*Identifier
+	Body       *BlockStatement
+}
+
+func (*FunctionLiteral) expressionNode() {}
+func (f *FunctionLiteral) TokenLiteral() string {
+	return f.Token.Literal
+}
+func (f *FunctionLiteral) String() string {
+	var out bytes.Buffer
+
+	var params []string
+	for _, param := range f.Parameters {
+		params = append(params, param.String())
+	}
+
+	out.WriteString(f.TokenLiteral())
+	out.WriteString(token.LPAREN)
+	out.WriteString(strings.Join(params, ", "))
+	out.WriteString(token.RPAREN + " ")
+	out.WriteString(f.Body.String())
 
 	return out.String()
 }

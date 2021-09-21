@@ -240,6 +240,50 @@ func TestIfElseExpression(t *testing.T) {
 	testIdentifier(t, alternative.Expression, "y")
 }
 
+func TestFunctionLiteral(t *testing.T) {
+	input := `fn(x, y) { x + y; }`
+
+	l := lexer.New(input)
+	p := New(l)
+
+	program := p.ParseProgram()
+	if program == nil {
+		t.Fatalf("ParseProgram() returned nil.")
+	}
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("It should have 1 statesment but %d", len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		log.Fatalf("Expected 'ExpressionStatement' type but '%T'", program.Statements[0])
+	}
+
+	expr, ok := stmt.Expression.(*ast.FunctionLiteral)
+	if !ok {
+		t.Fatalf("Expected 'FunctionLiteral' but '%T'", stmt.Expression)
+	}
+
+	if len(expr.Parameters) != 2 {
+		t.Fatalf("Expected 2 parameters but %d parameters seem existed.", len(expr.Parameters))
+	}
+
+	testIdentifier(t, expr.Parameters[0], "x")
+	testIdentifier(t, expr.Parameters[1], "y")
+
+	if len(expr.Body.Statements) != 1 {
+		t.Fatalf("Expected 1 statements but %d statements seem existed.", len(expr.Body.Statements))
+	}
+
+	exprStmt, ok := expr.Body.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("Expected 'ExpressionStatement' but '%T'", expr.Body.Statements[0])
+	}
+
+	testInfixExpression(t, exprStmt.Expression, "x", "+", "y")
+}
+
 func TestOrderPrecedences(t *testing.T) {
 	tests := []struct {
 		input    string
