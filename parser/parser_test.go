@@ -147,6 +147,41 @@ func TestBooleanExpression(t *testing.T) {
 	}
 }
 
+func TestOrderPrecedences(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{"1+1;", "(1 + 1)"},
+		{"-1+1;", "((-1) + 1)"},
+		{"-1*1 +1;", "(((-1) * 1) + 1)"},
+		{"!-1+1*1;", "((!(-1)) + (1 * 1))"},
+	}
+
+	for _, test := range tests {
+		l := lexer.New(test.input)
+		p := New(l)
+
+		program := p.ParseProgram()
+		if program == nil {
+			t.Fatalf("ParseProgram() returned nil.")
+		}
+
+		if len(program.Statements) != 1 {
+			t.Fatalf("It should have 1 statement but %d", len(program.Statements))
+		}
+
+		stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+		if !ok {
+			t.Fatalf("Expected 'ExpressionStatement' type but '%T'", program.Statements[0])
+		}
+
+		if test.expected != stmt.Expression.String() {
+			t.Fatalf("Expected '%s' but '%s'", test.expected, stmt.Expression.String())
+		}
+	}
+}
+
 func TestParsePrefixExpression(t *testing.T) {
 	tests := []struct {
 		input    string

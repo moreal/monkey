@@ -1,6 +1,9 @@
 package ast
 
-import "github.com/moreal/monkey/token"
+import (
+	"fmt"
+	"github.com/moreal/monkey/token"
+)
 
 type Node interface {
 	TokenLiteral() string
@@ -13,6 +16,7 @@ type Statement interface {
 
 type Expression interface {
 	Node
+	fmt.Stringer
 	expressionNode()
 }
 
@@ -58,6 +62,9 @@ func (*Identifier) expressionNode() {}
 func (i *Identifier) TokenLiteral() string {
 	return i.Token.Literal
 }
+func (i *Identifier) String() string {
+	return i.Value
+}
 
 type ExpressionStatement struct {
 	Token      token.Token
@@ -78,6 +85,9 @@ func (*IntegerLiteral) expressionNode() {}
 func (i *IntegerLiteral) TokenLiteral() string {
 	return i.Token.Literal
 }
+func (i *IntegerLiteral) String() string {
+	return fmt.Sprintf("%d", i.Value)
+}
 
 type PrefixExpression struct {
 	Token    token.Token
@@ -88,6 +98,9 @@ type PrefixExpression struct {
 func (*PrefixExpression) expressionNode() {}
 func (p *PrefixExpression) TokenLiteral() string {
 	return p.Token.Literal
+}
+func (p *PrefixExpression) String() string {
+	return fmt.Sprintf("%s%s%s%s", token.LPAREN, p.Operator, p.Right.String(), token.RPAREN)
 }
 
 type InfixExpression struct {
@@ -101,6 +114,9 @@ func (*InfixExpression) expressionNode() {}
 func (i *InfixExpression) TokenLiteral() string {
 	return i.Token.Literal
 }
+func (i *InfixExpression) String() string {
+	return fmt.Sprintf("%s%s %s %s%s", token.LPAREN, i.Left.String(), i.Operator, i.Right.String(), token.RPAREN)
+}
 
 type Boolean struct {
 	Token token.Token
@@ -110,4 +126,7 @@ type Boolean struct {
 func (*Boolean) expressionNode() {}
 func (b *Boolean) TokenLiteral() string {
 	return b.Token.Literal
+}
+func (b *Boolean) String() string {
+	return fmt.Sprintf("%t", b.Value)
 }
