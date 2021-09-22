@@ -23,6 +23,21 @@ func TestEvalIntegerExpression(t *testing.T) {
 	}
 }
 
+func TestEvalBooleanExpression(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected bool
+	}{
+		{"true", true},
+		{"false", false},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		testBooleanObject(t, evaluated, tt.expected)
+	}
+}
+
 func testEval(input string) object.Object {
 	l := lexer.New(input)
 	p := parser.New(l)
@@ -38,5 +53,16 @@ func testIntegerObject(t *testing.T, obj object.Object, expected int64) {
 
 	if integer.Value != expected {
 		t.Fatalf("Expected %d but %d", expected, integer.Value)
+	}
+}
+
+func testBooleanObject(t *testing.T, obj object.Object, expected bool) {
+	boolean, ok := obj.(*object.Boolean)
+	if !ok {
+		t.Fatalf("Expected 'Boolean' but '%T'", obj)
+	}
+
+	if boolean.Value != expected {
+		t.Fatalf("Expected %t but %t", expected, boolean.Value)
 	}
 }
