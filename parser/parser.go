@@ -12,6 +12,8 @@ const (
 	LOWEST
 	EQUALS
 	LESSGREATER
+	LOGICALOR
+	LOGICALAND
 	SUM
 	PRODUCT
 	PREFIX
@@ -30,6 +32,8 @@ var precedences = map[token.TokenType]int{
 	token.LTE:      LESSGREATER,
 	token.GT:       LESSGREATER,
 	token.GTE:      LESSGREATER,
+	token.LAND:     LOGICALAND,
+	token.LOR:      LOGICALOR,
 	token.PLUS:     SUM,
 	token.MINUS:    SUM,
 	token.SLASH:    PRODUCT,
@@ -74,6 +78,8 @@ func New(l *lexer.Lexer) *Parser {
 	parser.registerInfixParseFn(token.GTE, parser.parseInfixExpression)
 	parser.registerInfixParseFn(token.EQ, parser.parseInfixExpression)
 	parser.registerInfixParseFn(token.NEQ, parser.parseInfixExpression)
+	parser.registerInfixParseFn(token.LAND, parser.parseInfixExpression)
+	parser.registerInfixParseFn(token.LOR, parser.parseInfixExpression)
 
 	parser.registerInfixParseFn(token.LPAREN, parser.parseCallExpression)
 
@@ -375,7 +381,6 @@ func (p *Parser) nextToken() {
 }
 
 func (p *Parser) peekPrecedence() int {
-	//println(p.peekToken.Type)
 	if p, ok := precedences[p.peekToken.Type]; ok {
 		return p
 	}

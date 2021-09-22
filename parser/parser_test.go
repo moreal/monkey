@@ -368,6 +368,7 @@ func TestOrderPrecedences(t *testing.T) {
 		{"1+1*(1+2);", "(1 + (1 * (1 + 2)))"},
 		{"a + add(b * c) + d;", "((a + add((b * c))) + d)"},
 		{"add(add(x) * c);", "add((add(x) * c))"},
+		{"true || false && true || true == false;", "(((true || (false && true)) || true) == false)"},
 	}
 
 	for _, test := range tests {
@@ -446,6 +447,8 @@ func TestParseInfixExpression(t *testing.T) {
 		{"5 < 5;", 5, "<", 5},
 		{"5 <= 5;", 5, "<=", 5},
 		{"foo <= bar;", "foo", "<=", "bar"},
+		{"true && false;", true, "&&", false},
+		{"true || false;", true, "||", false},
 	}
 
 	for _, test := range tests {
