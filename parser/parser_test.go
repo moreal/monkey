@@ -28,15 +28,16 @@ let foobar = 838383;
 
 	tests := []struct {
 		expectedIdentifier string
+		expectedValue      interface{}
 	}{
-		{"x"},
-		{"y"},
-		{"foobar"},
+		{"x", 5},
+		{"y", 10},
+		{"foobar", 838383},
 	}
 
 	for i, tt := range tests {
 		stmt := program.Statements[i]
-		if !testLetStatement(t, stmt, tt.expectedIdentifier) {
+		if !testLetStatement(t, stmt, tt.expectedIdentifier, tt.expectedValue) {
 			return
 		}
 	}
@@ -48,6 +49,14 @@ return 5;
 return 10;
 return 100;
 `
+	tests := []struct {
+		expectedReturnValue interface{}
+	}{
+		{5},
+		{10},
+		{100},
+	}
+
 	l := lexer.New(input)
 	p := New(l)
 
@@ -60,9 +69,9 @@ return 100;
 		t.Fatalf("It should have 3 statesments but %d", len(program.Statements))
 	}
 
-	for i := 0; i < 3; i++ {
+	for i, tt := range tests {
 		stmt := program.Statements[i]
-		if !testReturnStatement(t, stmt) {
+		if !testReturnStatement(t, stmt, tt.expectedReturnValue) {
 			return
 		}
 	}
@@ -547,7 +556,7 @@ func testBoolean(t *testing.T, expression ast.Expression, value bool) {
 	}
 }
 
-func testLetStatement(t *testing.T, s ast.Statement, name string) bool {
+func testLetStatement(t *testing.T, s ast.Statement, name string, value interface{}) bool {
 	if s.TokenLiteral() != "let" {
 		t.Errorf("TokenLiteral expected 'let' but '%q'", s.TokenLiteral())
 		return false
@@ -569,20 +578,24 @@ func testLetStatement(t *testing.T, s ast.Statement, name string) bool {
 		return false
 	}
 
+	testLiteralExpression(t, letStmt.Value, value)
+
 	return true
 }
 
-func testReturnStatement(t *testing.T, s ast.Statement) bool {
+func testReturnStatement(t *testing.T, s ast.Statement, returnValue interface{}) bool {
 	if s.TokenLiteral() != "return" {
 		t.Errorf("TokenLiteral expected 'let' but '%q'", s.TokenLiteral())
 		return false
 	}
 
-	_, ok := s.(*ast.ReturnStatement)
+	stmt, ok := s.(*ast.ReturnStatement)
 	if !ok {
 		t.Errorf("expected 'ReturnStatement' type but '%T'", s)
 		return false
 	}
+
+	testLiteralExpression(t, stmt.Value, returnValue)
 
 	return true
 }
