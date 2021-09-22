@@ -159,11 +159,39 @@ if (1 < 10) {
 	}
 }
 
+func TestLetStatements(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int64
+	}{
+		{"let a = 10; a", 10},
+		{"let a = 10; a; 5;", 5},
+		{"let a = 10; let b = a; b;", 10},
+		{"let a = 10; let b = a + 5; b;", 15},
+		{`
+let a = 5 * 5;
+if (1 < 10) {
+  if (1 < 10) {
+    return a;
+  }
+
+  return 1;
+}`, 25},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		testIntegerObject(t, evaluated, tt.expected)
+	}
+}
+
 func testEval(input string) object.Object {
 	l := lexer.New(input)
 	p := parser.New(l)
 
-	return Eval(p.ParseProgram())
+	env := object.NewEnvironment()
+
+	return Eval(p.ParseProgram(), env)
 }
 
 func testIntegerObject(t *testing.T, obj object.Object, expected int64) {
