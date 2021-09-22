@@ -208,6 +208,32 @@ func TestFunctionObject(t *testing.T) {
 	}
 }
 
+func TestClosure(t *testing.T) {
+	input := `fn(x){let a = x * 2; fn(){a}}(5)()`
+
+	evaluated := testEval(input)
+	testIntegerObject(t, evaluated, 10)
+}
+
+func TestFunctionCallExpression(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int64
+	}{
+		{"let identity = fn(x) { x; }; identity(5)", 5},
+		{"let identity = fn(x) { return x; }; identity(5)", 5},
+		{"let double = fn(x) { x * 2; }; double(5);", 10},
+		{"let add = fn(x, y) { x + y; }; add(5, 2);", 7},
+		{"let add = fn(x, y) { x + y; }; add(5, add(2, 3));", 10},
+		{"fn(x) { x; }(5)", 5},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		testIntegerObject(t, evaluated, tt.expected)
+	}
+}
+
 func testEval(input string) object.Object {
 	l := lexer.New(input)
 	p := parser.New(l)
