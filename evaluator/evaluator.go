@@ -49,6 +49,12 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		} else {
 			return newError("identifier not found: %s", node.Value)
 		}
+	case *ast.FunctionLiteral:
+		return &object.Function{
+			Parameters: node.Parameters,
+			Body:       node.Body,
+			Env:        env,
+		}
 	case *ast.BlockStatement:
 		return evalBlockStatements(node, env)
 	case *ast.ReturnStatement:

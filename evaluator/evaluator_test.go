@@ -185,6 +185,29 @@ if (1 < 10) {
 	}
 }
 
+func TestFunctionObject(t *testing.T) {
+	input := "fn(x) { x + 2; };"
+	expectedBody := "(x + 2)"
+
+	evaluated := testEval(input)
+	fn, ok := evaluated.(*object.Function)
+	if !ok {
+		t.Fatalf("Expected 'Function' but '%T'", evaluated)
+	}
+
+	if len(fn.Parameters) != 1 {
+		t.Fatalf("Expected 1 parameters but %d parameters", len(fn.Parameters))
+	}
+
+	if fn.Parameters[0].String() != "x" {
+		t.Fatalf("The function should have 'x' parameter but '%s'", fn.Parameters[0].String())
+	}
+
+	if fn.Body.String() != expectedBody {
+		t.Fatalf("Expected body '%s' but '%s'", expectedBody, fn.Body.String())
+	}
+}
+
 func testEval(input string) object.Object {
 	l := lexer.New(input)
 	p := parser.New(l)
