@@ -66,18 +66,29 @@ func evalIntegerInfixExpression(operator string, left, right object.Object) obje
 	leftVal := left.(*object.Integer).Value
 	rightVal := right.(*object.Integer).Value
 
-	var result int64
 	switch operator {
 	case "+":
-		result = leftVal + rightVal
+		return &object.Integer{Value: leftVal + rightVal}
 	case "-":
-		result = leftVal - rightVal
+		return &object.Integer{Value: leftVal - rightVal}
 	case "*":
-		result = leftVal * rightVal
+		return &object.Integer{Value: leftVal * rightVal}
 	case "/":
-		result = leftVal / rightVal
+		return &object.Integer{Value: leftVal / rightVal}
+	case "<":
+		return &object.Boolean{Value: leftVal < rightVal}
+	case "<=":
+		return &object.Boolean{Value: leftVal <= rightVal}
+	case ">":
+		return &object.Boolean{Value: leftVal > rightVal}
+	case ">=":
+		return &object.Boolean{Value: leftVal >= rightVal}
+	case "==":
+		return &object.Boolean{Value: leftVal == rightVal}
+	case "!=":
+		return &object.Boolean{Value: leftVal != rightVal}
 	}
-	return &object.Integer{Value: result}
+	return nil
 }
 
 func evalBangOperatorExpression(right object.Object) object.Object {
