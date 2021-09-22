@@ -101,7 +101,7 @@ func (es *ExpressionStatement) TokenLiteral() string {
 func (es *ExpressionStatement) String() string {
 	var out bytes.Buffer
 
-	out.WriteString(es.String())
+	out.WriteString(es.Expression.String())
 	out.WriteString(token.SEMICOLON)
 
 	return out.String()
