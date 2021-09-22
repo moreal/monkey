@@ -3,8 +3,9 @@ package repl
 import (
 	"bufio"
 	"fmt"
+	"github.com/moreal/monkey/evaluator"
 	"github.com/moreal/monkey/lexer"
-	"github.com/moreal/monkey/token"
+	"github.com/moreal/monkey/parser"
 	"io"
 )
 
@@ -13,7 +14,10 @@ const PROMPT = ">> "
 func Start(in io.Reader, out io.Writer, err io.Writer) {
 	scanner := bufio.NewScanner(in)
 	for {
-		fmt.Fprintf(err, PROMPT)
+		if _, err := fmt.Fprintf(err, PROMPT); err != nil {
+			panic(err)
+		}
+
 		scanned := scanner.Scan()
 		if !scanned {
 			return
@@ -21,9 +25,13 @@ func Start(in io.Reader, out io.Writer, err io.Writer) {
 
 		line := scanner.Text()
 		l := lexer.New(line)
+		p := parser.New(l)
 
-		for tok := l.NextToken(); tok.Type != token.EOF; tok = l.NextToken() {
-			fmt.Fprintf(out, "%+v\n", tok)
+		evaluated := evaluator.Eval(p.ParseProgram())
+		if evaluated != nil {
+			if _, err := fmt.Fprintln(out, evaluated.Inspect()); err != nil {
+				panic(err)
+			}
 		}
 	}
 }
