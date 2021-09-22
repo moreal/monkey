@@ -123,6 +123,42 @@ if (1 < 10) {
 	}
 }
 
+func TestErrorHandling(t *testing.T) {
+	tests := []struct {
+		input           string
+		expectedMessage string
+	}{
+		{"5 + true;", "type mismatch: INTEGER + BOOLEAN"},
+		{"5 + true; 5;", "type mismatch: INTEGER + BOOLEAN"},
+		{"-true", "unknown operator: -BOOLEAN"},
+		{"true + false;", "unknown operator: BOOLEAN + BOOLEAN"},
+		{"5; true + false; 5;", "unknown operator: BOOLEAN + BOOLEAN"},
+		{"5; 1 && 20; 5;", "unknown operator: INTEGER && INTEGER"},
+		{`
+if (1 < 10) {
+  if (1 < 10) {
+    return true + false;
+  }
+
+  return 1;
+}`, "unknown operator: BOOLEAN + BOOLEAN"},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+
+		errObj, ok := evaluated.(*object.Error)
+		if !ok {
+			t.Errorf("Expected 'Error' but '%T'", evaluated)
+			continue
+		}
+
+		if errObj.Message != tt.expectedMessage {
+			t.Errorf("Expected error message '%s' but '%s'", tt.expectedMessage, errObj.Message)
+		}
+	}
+}
+
 func testEval(input string) object.Object {
 	l := lexer.New(input)
 	p := parser.New(l)
